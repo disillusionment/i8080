@@ -489,8 +489,7 @@ case 0x0556: case 0x0558: case 0x055a:
                 break;
         case 0x19:
                 /*printf("DAD    D\n"); */
-                temp = ((CPU->h * 0x100) + CPU->l);
-                temp = temp + temp;
+                temp = ((CPU->h * 0x100) + CPU->l) + ((CPU->d * 0x100) + CPU->e);
                 CPU->h = temp / 0x0100;
                 CPU->l = temp & 0x00FF;
                 CPU->flags.C = (temp >> 16) && 0x1;
