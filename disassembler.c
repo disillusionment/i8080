@@ -5,7 +5,7 @@ int Disassemble8080Op(unsigned char *codebuffer, int pc)
 {
   unsigned char *code = codebuffer;
   int opbytes = 1;
-  printf ("%04x ",pc);
+  printf ("%04x ",pc+0x100);
   switch(code[pc])
   {
     case 0x01:
@@ -51,6 +51,7 @@ int Disassemble8080Op(unsigned char *codebuffer, int pc)
     case 0xDB:
     case 0xDE:
     case 0xE6:
+    case 0xFE:
       printf("  %02x %02x      ", code[pc],code[pc+1]);
       break;
     default:
@@ -276,7 +277,7 @@ int Disassemble8080Op(unsigned char *codebuffer, int pc)
     case 0xD3: printf("OUT    $%02x", code[pc+1]); opbytes=2; break;
     case 0xD4: printf("CNC    $%02x%02x", code[pc+2], code[pc+1]); opbytes=3; break;
     case 0xD5: printf("PUSH   D"); break;
-    case 0xD6: printf("SUI    $%02x", code[pc+1]); opbytes=1; break;
+    case 0xD6: printf("SUI    $%02x", code[pc+1]); opbytes=2; break;
     case 0xD7: printf("RST    2"); break;
     case 0xD8: printf("RC"); break;
     case 0xD9: printf("NOP"); break;
@@ -300,7 +301,7 @@ int Disassemble8080Op(unsigned char *codebuffer, int pc)
     case 0xEB: printf("CXHG"); break;
     case 0xEC: printf("CPE    $%02x%02x", code[pc+2], code[pc+1]); opbytes=3; break;
     case 0xED: printf("NOP"); break;
-    case 0xEE: printf("XRI    $%20x", code[pc+1]); opbytes=1; break;
+    case 0xEE: printf("XRI    $%20x", code[pc+1]); opbytes=2; break;
     case 0xEF: printf("RST    5"); break;
     case 0xF0: printf("RP"); break;
     case 0xF1: printf("POP    PSW"); break;
@@ -308,7 +309,7 @@ int Disassemble8080Op(unsigned char *codebuffer, int pc)
     case 0xF3: printf("DI"); break;
     case 0xF4: printf("CP     $%02x%02x", code[pc+2], code[pc+1]); opbytes=3; break;
     case 0xF5: printf("PUSH   PSW"); break;
-    case 0xF6: printf("ORI    $%02x", code[pc+1]); opbytes=1; break;
+    case 0xF6: printf("ORI    $%02x", code[pc+1]); opbytes=2; break;
     case 0xF7: printf("RST    6"); break;
     case 0xF8: printf("RM"); break;
     case 0xF9: printf("SPHL"); break;
@@ -316,7 +317,7 @@ int Disassemble8080Op(unsigned char *codebuffer, int pc)
     case 0xFB: printf("EI"); break;
     case 0xFC: printf("CM     $%02x%02x", code[pc+2], code[pc+1]); opbytes=3; break;
     case 0xFD: printf("NOP"); break;
-    case 0xFE: printf("CPI    $%02x", code[pc+1]); opbytes=1; break;
+    case 0xFE: printf("CPI    $%02x", code[pc+1]); opbytes=2; break;
     case 0xFF: printf("RST    7"); break;
   }
 
