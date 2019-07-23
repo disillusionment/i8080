@@ -125,7 +125,7 @@ void write_memory(uint16_t location, uint8_t value)
 if(location < 0xFFFF) {
 /*              printf("Storing $%02x at $%04x\n",value,location); */
                 system_memory[location] = value;
-}               
+}
 /* else { printf("Not storing $%02x at $%04x",value,location);} */
 }
 
@@ -165,7 +165,7 @@ void check_zero(int reg, struct i8080Status *fCPU)
                 fCPU->flags.S = 0;
         }
         /* check parity */
-        p_temp = reg;   
+        p_temp = reg;
         p_temp = p_temp ^ (p_temp >> 4);
         p_temp = p_temp ^ (p_temp >> 2);
         p_temp = p_temp ^ (p_temp >> 1);
@@ -174,6 +174,7 @@ void check_zero(int reg, struct i8080Status *fCPU)
 
 void dump_mem(int start, int end) {
         int location = 0x00;
+        printf("Dumping Memory...\n");
         printf("addr $%04x-",start);
 
         for(location=start;location<end+1;location++) {
@@ -205,15 +206,15 @@ void doSerialComm(void)
                         i=0;serial_buffer_in=0;
                 }
                 if(serial_buffer_in == 0x18) {
-                        dump_mem(0x100,0x120);
+                        dump_mem(0x016F,0x0173);
                         i=0;serial_buffer_in=0;
                 }
 
                 if(serial_buffer_in == 0x19) {
-                        dump_ops();     
+                        dump_ops();
                         i=0;serial_buffer_in=0;
 
-                }       
+                }
         }
 }
 
@@ -303,17 +304,21 @@ void DecodeInstruction(struct i8080Status *CPU)
         if (DEBUG) {
                 switch (CPU->pc) {
                 /* Addresses to ignore */
-                case 0x0000:
-
-/* basic.basic.rom * /
-                case 0x0043: case 0x0090: case 0x0092: case 0x0094: case 0x0096: case 0x0097: case 0x009b: case 0x009c: case 0x0098:
-                case 0x00A3: case 0x00A5: case 0x00A7: case 0x49: case 0xA2: case 0xaa: case 0xab: case 0xad: case 0xae: case 0xaf: case 0xb0: case 0xb1:
-*/
-/* 4kbas32.bin */                       
-case 0x0341: case 0x0382: case 0x0384: case 0x0386: case 0x0389: case 0x038b: case 0x038d: case 0x0344: case 0x0346: case 0x0349: case 0x034b:
-case 0x0556: case 0x0558: case 0x055a: 
-/* */
-                     break;
+                case 0x0341:
+                case 0x0382:
+                case 0x0384:
+                case 0x0386:
+                case 0x0389:
+                case 0x038b:
+                case 0x038d:
+                case 0x0344: case 0x0346:
+                case 0x0349: case 0x034b:
+                        break;
+                /* 4kBasic Out Character */
+                case 0x036e ... 0x0381:
+                /* 4kBasic Print String*/
+                case 0x05A2 ... 0x05B0:
+                break;
 
                 default:
         /*              printf("$%04x:", CPU->pc); */
@@ -321,7 +326,7 @@ case 0x0556: case 0x0558: case 0x055a:
                         printf("BC%02x%02x-DE%02x%02x-HL%02x%02x-A%02x", CPU->b, CPU->c, CPU->d, CPU->e, CPU->h, CPU->l, CPU->a);
                         if(CPU->a > 0x20 && CPU->a < 0x7F) { printf(" \"%c\" ",CPU->a); } else {  printf(" %02x  ",CPU->a); }
                         printf("S%iZ%iI%iY%iP%iC%i ", CPU->flags.S, CPU->flags.Z, CPU->flags.I, CPU->flags.Y, CPU->flags.P, CPU->flags.C);
-                        printf("M [$%02x] SP[$%02x%02x]\n",system_memory[(CPU->h*0x100)+CPU->l],system_memory[CPU->sp+1],system_memory[CPU->sp]);
+                        printf("M [$%02x] SP[$%02x%02x]\n",system_memory[(CPU->h*0x100)+CPU->l],system_memory[CPU->sp+1],system_memory[CPU->sp+0]);
                         break;
                 }
 
@@ -361,7 +366,7 @@ case 0x0556: case 0x0558: case 0x055a:
 
         case 0x04:
                 /*printf("INR    B\n"); */
-                CPU->b = CPU->b + 1;
+                CPU->b = (CPU->b + 1) & 0xFF;
                 check_zero(CPU->b, CPU);
                 break;
 
@@ -382,7 +387,7 @@ case 0x0556: case 0x0558: case 0x055a:
                 if ((CPU->a & 0x80) == 0x80) {
                         CPU->flags.C = 1;
                         CPU->a = CPU->a << 1;
-                        CPU->a = CPU->a & 0x01;
+                        CPU->a = CPU->a | 0x01; /* OR not AND! */
                 } else {
                         CPU->flags.C = 0;
                         CPU->a = CPU->a << 1;
@@ -416,7 +421,7 @@ case 0x0556: case 0x0558: case 0x055a:
 
         case 0x0C:
                 /*printf("INR    C\n"); */
-                CPU->c = CPU->c + 1;
+                CPU->c = (CPU->c + 1) & 0xFF;
                 check_zero(CPU->c, CPU);
                 break;
 
@@ -437,7 +442,7 @@ case 0x0556: case 0x0558: case 0x055a:
                 if (CPU->a & 0x01) {
                         CPU->flags.C = 1;
                         CPU->a = CPU->a >> 1;
-                        CPU->a = CPU->a & 0x80;
+                        CPU->a = CPU->a | 0x80;
                 } else {
                         CPU->flags.C = 0;
                         CPU->a = CPU->a >> 1;
@@ -465,7 +470,7 @@ case 0x0556: case 0x0558: case 0x055a:
                 break;
         case 0x14:
                 /*printf("INR    D\n"); */
-                CPU->d = CPU->d + 1;
+                CPU->d = (CPU->d + 1) & 0xFF;
                 check_zero(CPU->d, CPU);
                 break;
         case 0x15:
@@ -507,7 +512,7 @@ case 0x0556: case 0x0558: case 0x055a:
                 break;
         case 0x1C:
                 /*printf("INR    E\n"); */
-                CPU->e = CPU->e + 1;
+                CPU->e = (CPU->e + 1) & 0xFF;
                 check_zero(CPU->e, CPU);
                 break;
         case 0x1D:
@@ -530,15 +535,16 @@ case 0x0556: case 0x0558: case 0x055a:
                 /*printf("NOP\n"); */
                 break;
         case 0x21:
-                /*printf("LXI    H,$%02x%02x\n", system_memory[oploc+2], system_memory[oploc+1]); */
+                /* printf("LXI    H,$%02x%02x\n", system_memory[oploc+2], system_memory[oploc+1]); */
                 CPU->h = system_memory[oploc + 2];
                 CPU->l = system_memory[oploc + 1];
                 CPU->pc = CPU->pc + 2;
                 break;
         case 0x22:
                 /*printf("SHLD   $%02x%02x\n", system_memory[oploc+2], system_memory[oploc+1]); */
-                system_memory[((system_memory[oploc + 2] * 0x100) + system_memory[oploc + 1])  ] = CPU->l;
-                system_memory[((system_memory[oploc + 2] * 0x100) + system_memory[oploc + 1]) + 1] = CPU->h;
+                temp = ((system_memory[oploc + 2] * 0x100) + system_memory[oploc + 1]);
+                system_memory[temp    ] = CPU->l;
+                system_memory[temp + 1] = CPU->h;
                 CPU->pc = CPU->pc + 2;
                 break;
         case 0x23:
@@ -550,7 +556,7 @@ case 0x0556: case 0x0558: case 0x055a:
                 break;
         case 0x24:
                 /*printf("INR    H\n"); */
-                CPU->h = CPU->h + 1;
+                CPU->h = (CPU->h + 1) & 0xFF;
                 check_zero(CPU->h, CPU);
                 break;
         case 0x25:
@@ -599,9 +605,11 @@ case 0x0556: case 0x0558: case 0x055a:
                 CPU->flags.C = (temp >> 16);
                 break;
         case 0x2A:
-                /*printf("LHLD   $%02x%02x\n", system_memory[oploc+2], system_memory[oploc+1]); opbytes=3; */
-                CPU->l = system_memory[((system_memory[oploc + 2] * 0x100) + system_memory[oploc + 1])  ];
-                CPU->h = system_memory[((system_memory[oploc + 2] * 0x100) + system_memory[oploc + 1]) + 1];
+                /* printf("LHLD   $%02x%02x ", system_memory[oploc+2], system_memory[oploc+1]); */
+                temp = (system_memory[oploc + 2] * 0x100) + system_memory[oploc + 1];
+                /* printf("H$%02x L$%02x \n",system_memory[temp + 1],system_memory[temp]); */
+                CPU->l = system_memory[temp    ];
+                CPU->h = system_memory[temp + 1];
                 CPU->pc = CPU->pc + 2;
                 break;
         case 0x2B:
@@ -613,7 +621,7 @@ case 0x0556: case 0x0558: case 0x055a:
                 break;
         case 0x2C:
                 /*printf("INR    L\n"); */
-                CPU->l = CPU->l + 1;
+                CPU->l = (CPU->l + 1) & 0xFF;
                 check_zero(CPU->l, CPU);
                 break;
         case 0x2D:
@@ -654,7 +662,7 @@ case 0x0556: case 0x0558: case 0x055a:
                 /*printf("INR    M\n"); */
                 addr = ((CPU->h * 0x100) + CPU->l);
                 temp =  system_memory[addr];
-                temp = temp + 1;
+                temp = (temp + 1) & 0xFF;
                 write_memory(addr, temp);
                 /*system_memory[addr] = system_memory[addr] + 1; */
                 check_zero(temp, CPU);
@@ -703,7 +711,7 @@ case 0x0556: case 0x0558: case 0x055a:
                 break;
         case 0x3C:
                 /*printf("INR    A\n"); */
-                CPU->a = CPU->a + 1;
+                CPU->a = (CPU->a + 1) & 0xFF;
                 check_zero(CPU->a, CPU);
                 break;
         case 0x3D:
@@ -1536,9 +1544,10 @@ case 0x0556: case 0x0558: case 0x055a:
         case 0xC9:
                 /*printf("RET\n"); */
                 /* Restore Address from Stack */
+                /* printf("Loading %x from stack\n", (system_memory[CPU->sp + 1] * 0x100) + system_memory[CPU->sp]); */
                 CPU->pc = (system_memory[CPU->sp + 1] * 0x100) + system_memory[CPU->sp];
                 CPU->sp = CPU->sp + 2;
-                /*//printf("Stack Pointer Now: $%04x\n",CPU->sp); */
+                /* printf("Stack Pointer Now: $%04x\n",CPU->sp);  */
                 break;
 
         case 0xCA: /*printf("JZ     $%02x%02x\n", system_memory[oploc+2], system_memory[oploc+1]); opbytes=3; */
@@ -1564,11 +1573,12 @@ case 0x0556: case 0x0558: case 0x055a:
                 }
                 break;
         case 0xCD:
-                /*printf("CALL   $%02x%02x\n", system_memory[oploc+2], system_memory[oploc+1]); */
-                /*//printf("Stack Pointer Starts at: $%04x\n",CPU->sp); */
-                system_memory[CPU->sp - 1] = ((oploc + 3) / 0x100);     /*//printf("%04x\n",((CPU->pc+3) / 0x100)); */
-                system_memory[CPU->sp - 2] = ((oploc + 3) & 0xFF);      /*//printf("%04x\n",(( CPU->pc+3 )& 0xFF)); */
-                CPU->sp = CPU->sp - 2;                                  /*//printf("Stack Pointer Now: $%04x\n",CPU->sp); */
+                /* printf("CALL   $%02x%02x\n", system_memory[oploc+2], system_memory[oploc+1]);  */
+                /* printf("Return Address will be : $%04x\n",oploc+3);*/
+                /* printf("Stack Pointer Starts at: $%04x\n",CPU->sp); */
+                system_memory[CPU->sp - 1] = ((oploc + 3) / 0x100);      /*  printf("$%04x %02x\n",CPU->sp - 1,  ((oploc + 3) / 0x100));  */
+                system_memory[CPU->sp - 2] = ((oploc + 3) & 0x0FF);      /*  printf("$%04x %02x\n",CPU->sp - 2,  ((oploc + 3) & 0x0FF)); */
+                CPU->sp = CPU->sp - 2;                                   /* printf("Stack Pointer Now: $%04x\n",CPU->sp);*/
                 CPU->pc = ((system_memory[oploc + 2] * 0x100) + system_memory[oploc + 1]);
                 break;
         case 0xCE: /*printf("ACI    $%02x", system_memory[oploc+1]); */
@@ -1903,8 +1913,8 @@ case 0x0556: case 0x0558: case 0x055a:
                 }
                 break;
 
-        case 0xFB: printf("EI");
-                NotImplemented();
+        case 0xFB: /* printf("EI"); */
+                /* Interrupts Enabled */
                 break;
 
         case 0xFC:
@@ -1972,7 +1982,7 @@ int load_memory(char *filename, uint16_t location)
         printf("File Read into Memory.\n");
         fclose(fp);
         printf("File Closed\n");
-        return(fsize); 
+        return(fsize);
 }
 
 
