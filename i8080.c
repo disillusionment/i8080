@@ -484,7 +484,7 @@ void DecodeInstruction(struct i8080Status *CPU)
                 CPU->pc = CPU->pc + 1;
                 break;
         case 0x17:
-                /*printf("RAL\n"); */
+                /* printf("RAL "); */
                 temp = CPU->a;
                 CPU->a =  CPU->flags.C + (temp << 1);
                 CPU->flags.C = 0x80 && (temp & 0x80);
@@ -528,7 +528,7 @@ void DecodeInstruction(struct i8080Status *CPU)
         case 0x1F:
                 /*printf("RAR\n"); */
                 temp = CPU->a;
-                CPU->a = CPU->flags.C << 7 | temp >> 1;
+                CPU->a =  (temp >> 1) | (CPU->flags.C << 7);
                 CPU->flags.C = (0x01 == (temp & 0x01));
                 break;
         case 0x20:
@@ -1639,7 +1639,8 @@ void DecodeInstruction(struct i8080Status *CPU)
                 system_memory[CPU->sp - 2] = CPU->e;
                 CPU->sp = CPU->sp - 2;
                 break;
-        case 0xD6: /*printf("SUI    $%02x", system_memory[oploc+1]); opbytes=1; */
+        case 0xD6:
+                /* printf("SUI    $%02x", system_memory[oploc+1]);*/
                 temp = CPU->a - (system_memory[oploc + 1]);
                 CPU->a = temp & 0xFF;
                 CPU->flags.C = (temp > 0xFF);
@@ -1690,11 +1691,15 @@ void DecodeInstruction(struct i8080Status *CPU)
                 /*printf("NOP\n"); */
                 break;
         case 0xDE:
-                /* printf("SBI    $%02x", system_memory[oploc+1]); opbytes=2; */
+                /* printf("SBI    $%02x", system_memory[oploc+1]); */
                 /*2-18-25 11pm was subtractic CPU->b */
-                temp = CPU->a + (~(system_memory[oploc+1] + CPU->flags.C) + 0x01);
+                temp = CPU->a;
+                temp = temp  - system_memory[oploc+1];
+                temp = temp  - CPU->flags.C;
+
                 CPU->flags.C = (temp > 0xFF);
                 CPU->flags.Y = 0;
+                CPU->a = (temp & 0xFF);
                 check_zero(CPU->a, CPU);
                 CPU->pc++;
                 break;
