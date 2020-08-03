@@ -996,190 +996,191 @@ void DecodeInstruction(struct i8080Status *CPU)
                 break;
         case 0x80: /*printf("ADD    B\n"); */
                 temp = CPU->a + CPU->b;
-                CPU->a = temp & 0xFF;
                 CPU->flags.C = temp >> 0x08;
                 if (((0x0F & CPU->a) + (0x0F & CPU->b)) > 0x0F) {
                         CPU->flags.Y = 1;
                 } else {
                         CPU->flags.Y = 0;
                 }
+                CPU->a = temp & 0xFF;
                 check_zero(CPU->a, CPU);
                 break;
         case 0x81:
                 /*printf("ADD    C\n"); */
                 temp = CPU->a + CPU->c;
-                CPU->a = temp & 0xFF;
                 CPU->flags.C = temp >> 0x08;
                 if (((0x0F & CPU->a) + (0x0F & CPU->c)) > 0x0F) {
                         CPU->flags.Y = 1;
                 } else {
                         CPU->flags.Y = 0;
                 }
+                CPU->a = temp & 0xFF;
                 check_zero(CPU->a, CPU);
                 break;
         case 0x82:
                 /*printf("ADD    D"); */
                 temp = CPU->a + CPU->d;
-                CPU->a = temp & 0xFF;
                 CPU->flags.C = temp >> 0x08;
                 if (((0x0F & CPU->a) + (0x0F & CPU->d)) > 0x0F) {
                         CPU->flags.Y = 1;
                 } else {
                         CPU->flags.Y = 0;
                 }
+                CPU->a = temp & 0xFF;
                 check_zero(CPU->a, CPU);
                 break;
         case 0x83:
                 /*printf("ADD    E"); */
                 temp = CPU->a + CPU->e;
-                CPU->a = temp & 0xFF;
                 CPU->flags.C = temp >> 0x08;
                 if (((0x0F & CPU->a) + (0x0F & CPU->e)) > 0x0F) {
                         CPU->flags.Y = 1;
                 } else {
                         CPU->flags.Y = 0;
                 }
+                CPU->a = temp & 0xFF;
                 check_zero(CPU->a, CPU);
                 break;
         case 0x84:
                 /*printf("ADD    H"); */
                 temp = CPU->a + CPU->h;
-                CPU->a = temp & 0xFF;
                 CPU->flags.C = temp >> 0x08;
                 if (((0x0F & CPU->a) + (0x0F & CPU->h)) > 0x0F) {
                         CPU->flags.Y = 1;
                 } else {
                         CPU->flags.Y = 0;
                 }
+                CPU->a = temp & 0xFF;
                 check_zero(CPU->a, CPU);
                 break;
         case 0x85:
                 /*printf("ADD    L"); */
                 temp = CPU->a + CPU->l;
-                CPU->a = temp & 0xFF;
                 CPU->flags.C = temp >> 0x08;
                 if (((0x0F & CPU->a) + (0x0F & CPU->l)) > 0x0F) {
                         CPU->flags.Y = 1;
                 } else {
                         CPU->flags.Y = 0;
                 }
+                CPU->a = temp & 0xFF;
                 check_zero(CPU->a, CPU);
                 break;
         case 0x86:
                 /*printf("ADD    M"); */
                 temp = CPU->a + (system_memory[(CPU->h * 0x100) + CPU->l]);
-                CPU->a = temp & 0xFF;
                 CPU->flags.C = temp >> 0x08;
                 if (((0x0F & CPU->a) + (0x0F & (system_memory[(CPU->h * 0x100) + CPU->l]))) > 0x0F) {
                         CPU->flags.Y = 1;
                 } else {
                         CPU->flags.Y = 0;
                 }
+                CPU->a = temp & 0xFF;
                 check_zero(CPU->a, CPU);
                 break;
         case 0x87:
                 /*printf("ADD    A"); */
                 temp = CPU->a + CPU->a;
-                CPU->a = temp & 0xFF;
                 CPU->flags.C = temp >> 0x08;
                 if (((0x0F & CPU->a) + (0x0F & CPU->a)) > 0x0F) {
                         CPU->flags.Y = 1;
                 } else {
                         CPU->flags.Y = 0;
                 }
+                CPU->a = temp & 0xFF;
                 check_zero(CPU->a, CPU);
                 break;
         case 0x88:
                 /* printf("ADC    B"); */
                 temp = CPU->a + CPU->b + CPU->flags.C;
-                CPU->a = temp & 0xFF;
                 CPU->flags.C = temp >> 0x08;
                 if (((0x0F & CPU->a) + (0x0F & CPU->b)) > 0x0F) {
                         CPU->flags.Y = 1;
                 } else {
                         CPU->flags.Y = 0;
                 }
+                CPU->a = temp & 0xFF;
                 check_zero(CPU->a, CPU);
                 break;
         case 0x89:
                 /* printf("ADC    C"); */
                 temp = CPU->a + CPU->c + CPU->flags.C;
-                CPU->a = temp & 0xFF;
                 CPU->flags.C = temp >> 0x08;
                 if (((0x0F & CPU->a) + (0x0F & CPU->c)) > 0x0F) {
                         CPU->flags.Y = 1;
                 } else {
                         CPU->flags.Y = 0;
                 }
+                CPU->a = temp & 0xFF;
                 check_zero(CPU->a, CPU);
                 break;
         case 0x8A:
                 /* printf("ADC    D"); */
                 temp = CPU->a + CPU->d + CPU->flags.C;
-                CPU->a = temp & 0xFF;
                 CPU->flags.C = temp >> 0x08;
                 if (((0x0F & CPU->a) + (0x0F & CPU->d)) > 0x0F) {
                         CPU->flags.Y = 1;
                 } else {
                         CPU->flags.Y = 0;
                 }
+                CPU->a = temp & 0xFF;
                 check_zero(CPU->a, CPU);
                 break;
         case 0x8B:
                 /* printf("ADC    E"); */
                 temp = CPU->a + CPU->e + CPU->flags.C;
-                CPU->a = temp & 0xFF;
                 CPU->flags.C = temp >> 0x08;
                 if (((0x0F & CPU->a) + (0x0F & CPU->e)) > 0x0F) {
                         CPU->flags.Y = 1;
                 } else {
                         CPU->flags.Y = 0;
                 }
+                CPU->a = temp & 0xFF;
                 check_zero(CPU->a, CPU);
                 break;
         case 0x8C:
                 /* printf("ADC    H"); */
                 temp = CPU->a + CPU->h + CPU->flags.C;
-                CPU->a = temp & 0xFF;
                 CPU->flags.C = temp >> 0x08;
                 if (((0x0F & CPU->a) + (0x0F & CPU->h)) > 0x0F) {
                         CPU->flags.Y = 1;
                 } else {
                         CPU->flags.Y = 0;
                 }
+                CPU->a = temp & 0xFF;
                 check_zero(CPU->a, CPU);
                 break;
-        case 0x8D:/* printf("ADC    L"); */
+        case 0x8D:
+                /* printf("ADC    L"); */
                 temp = CPU->a + CPU->l + CPU->flags.C;
-                CPU->a = temp & 0xFF;
                 CPU->flags.C = temp >> 0x08;
                 if (((0x0F & CPU->a) + (0x0F & CPU->l)) > 0x0F) {
                         CPU->flags.Y = 1;
                 } else {
                         CPU->flags.Y = 0;
                 }
+                CPU->a = temp & 0xFF;
                 check_zero(CPU->a, CPU);
                 break;
         case 0x8E:/* printf("ADC    M"); */
                 temp = CPU->a + (system_memory[(CPU->h * 0x100) + CPU->l]) + CPU->flags.C;
-                CPU->a = temp & 0xFF;
                 CPU->flags.C = temp >> 0x08;
                 if (((0x0F & CPU->a) + (0x0F & (system_memory[(CPU->h * 0x100) + CPU->l]))) > 0x0F) {
                         CPU->flags.Y = 1;
                 } else {
                         CPU->flags.Y = 0;
                 }
+                CPU->a = temp & 0xFF;
                 check_zero(CPU->a, CPU);
                 break;
         case 0x8F:/* printf("ADC    A"); */
                 temp = CPU->a + CPU->a + CPU->flags.C;
-                CPU->a = temp & 0xFF;
                 CPU->flags.C = temp >> 0x08;
                 if (((0x0F & CPU->a) + (0x0F & CPU->a)) > 0x0F) {
                         CPU->flags.Y = 1;
                 } else {
                         CPU->flags.Y = 0;
                 }
+                CPU->a = temp & 0xFF;
                 check_zero(CPU->a, CPU);
                 break;
         case 0x90:
