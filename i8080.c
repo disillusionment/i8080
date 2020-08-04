@@ -12,6 +12,17 @@ int DEBUG = 0;
 char OPS_USED[256];
 
 uint8_t FRONT_PANEL_SWITCHES = 0x10;
+/* processor flags */
+typedef struct flag_struct {
+        unsigned int C  : 1;
+        unsigned int A1 : 1;
+        unsigned int P  : 1;
+        unsigned int Y  : 1;
+        unsigned int I  : 1;
+        unsigned int const A0 : 1;
+        unsigned int Z  : 1;
+        unsigned int S  : 1;
+} flag;
 
 struct i8080Status {
         /* registers */
@@ -28,18 +39,8 @@ struct i8080Status {
         unsigned int pc;
         /* stack poniter */
         uint16_t sp;
+        flag flags;
 
-        /* processor flags */
-        struct {
-                unsigned int C  : 1;
-                unsigned int const A1 : 1;
-                unsigned int P  : 1;
-                unsigned int Y  : 1;
-                unsigned int I  : 1;
-                unsigned int const A0 : 1;
-                unsigned int Z  : 1;
-                unsigned int S  : 1;
-        } flags;
         uint8_t i_en;
 } i8080Status;
 
@@ -142,6 +143,7 @@ void zeroCPU(struct i8080Status *CPU)
         CPU->sp = 0;
 
         CPU->flags.S = 0;
+        CPU->flags.A1= 1;
         CPU->flags.Z = 0;
         CPU->flags.I = 0;
         CPU->flags.Y = 0;
@@ -304,7 +306,7 @@ void DecodeInstruction(struct i8080Status *CPU)
         if (DEBUG) {
                 switch (CPU->pc) {
                 /* Addresses to ignore */
-                case 0x0341:
+                /* case 0x0341:
                 case 0x0382:
                 case 0x0384:
                 case 0x0386:
@@ -313,11 +315,11 @@ void DecodeInstruction(struct i8080Status *CPU)
                 case 0x038d:
                 case 0x0344: case 0x0346:
                 case 0x0349: case 0x034b:
-                        break;
+                        break; */
                 /* 4kBasic Out Character */
-                case 0x036e ... 0x0381:
+/*              case 0x036e ... 0x0381:*/
                 /* 4kBasic Print String*/
-                case 0x05A2 ... 0x05B0:
+                /*case 0x05A2 ... 0x05B0:*/
                 break;
 
                 default:
@@ -325,7 +327,7 @@ void DecodeInstruction(struct i8080Status *CPU)
                         printf(" PC $%04x OPCODE= $%02x SP $%04x ", CPU->pc, system_memory[CPU->pc], CPU->sp);
                         printf("BC%02x%02x-DE%02x%02x-HL%02x%02x-A%02x", CPU->b, CPU->c, CPU->d, CPU->e, CPU->h, CPU->l, CPU->a);
                         if(CPU->a > 0x20 && CPU->a < 0x7F) { printf(" \"%c\" ",CPU->a); } else {  printf(" %02x  ",CPU->a); }
-                        printf("S%iZ%iI%iY%iP%iC%i ", CPU->flags.S, CPU->flags.Z, CPU->flags.I, CPU->flags.Y, CPU->flags.P, CPU->flags.C);
+                        printf("S%iZ%iI%iY%iP%iA1%iC%i ", CPU->flags.S, CPU->flags.Z, CPU->flags.I, CPU->flags.Y, CPU->flags.P, CPU->flags.A1 ,CPU->flags.C);
                         printf("M [$%02x] SP[$%02x%02x]\n",system_memory[(CPU->h*0x100)+CPU->l],system_memory[CPU->sp+1],system_memory[CPU->sp+0]);
                         break;
                 }
@@ -372,6 +374,12 @@ void DecodeInstruction(struct i8080Status *CPU)
 
         case 0x05:
                 /*printf("DCR    B\n"); */
+                if(CPU->b && 0x100) {
+                  CPU->flags.Y = 1;
+                } else {
+                  CPU->flags.Y = 0;
+                };
+
                 CPU->b = CPU->b - 1;
                 check_zero(CPU->b, CPU);
                 break;
@@ -427,6 +435,11 @@ void DecodeInstruction(struct i8080Status *CPU)
 
         case 0x0D:
                 /*printf("DCR    C\n"); */
+                if(CPU->c && 0x100) {
+                  CPU->flags.Y = 1;
+                } else {
+                  CPU->flags.Y = 0;
+                };
                 CPU->c = CPU->c - 1;
                 check_zero(CPU->c, CPU);
                 break;
@@ -475,6 +488,11 @@ void DecodeInstruction(struct i8080Status *CPU)
                 break;
         case 0x15:
                 /*printf("DCR    D\n"); */
+                if(CPU->d && 0x100) {
+                  CPU->flags.Y = 1;
+                } else {
+                  CPU->flags.Y = 0;
+                };
                 CPU->d = CPU->d - 1;
                 check_zero(CPU->d, CPU);
                 break;
@@ -517,6 +535,11 @@ void DecodeInstruction(struct i8080Status *CPU)
                 break;
         case 0x1D:
                 /*printf("DCR    E\n"); */
+                if(CPU->e && 0x100) {
+                  CPU->flags.Y = 1;
+                } else {
+                  CPU->flags.Y = 0;
+                };
                 CPU->e = CPU->e - 1;
                 check_zero(CPU->e, CPU);
                 break;
@@ -561,6 +584,11 @@ void DecodeInstruction(struct i8080Status *CPU)
                 break;
         case 0x25:
                 /*printf("DCR    H\n"); */
+                if(CPU->h && 0x100) {
+                  CPU->flags.Y = 1;
+                } else {
+                  CPU->flags.Y = 0;
+                };
                 CPU->h = CPU->h - 1;
                 check_zero(CPU->h, CPU);
                 break;
@@ -626,6 +654,11 @@ void DecodeInstruction(struct i8080Status *CPU)
                 break;
         case 0x2D:
                 /*printf("DCR    L\n"); */
+                if(CPU->l && 0x100) {
+                  CPU->flags.Y = 1;
+                } else {
+                  CPU->flags.Y = 0;
+                };
                 CPU->l = CPU->l - 1;
                 check_zero(CPU->l, CPU);
                 break;
@@ -671,6 +704,11 @@ void DecodeInstruction(struct i8080Status *CPU)
                 /*printf("DCR    M\n"); */
                 addr = (CPU->h * 0x100) + CPU->l;
                 temp =  system_memory[addr];
+                if(temp && 0x100) {
+                  CPU->flags.Y = 1;
+                } else {
+                  CPU->flags.Y = 0;
+                };
                 temp = temp - 1;
                 write_memory(addr, temp);
                 /*system_memory[addr] = (system_memory[addr] - 1); */
@@ -716,6 +754,11 @@ void DecodeInstruction(struct i8080Status *CPU)
                 break;
         case 0x3D:
                 /*printf("DCR    A\n"); */
+                if(CPU->a && 0x100) {
+                  CPU->flags.Y = 1;
+                } else {
+                  CPU->flags.Y = 0;
+                };
                 CPU->a = CPU->a - 1;
                 check_zero(CPU->a, CPU);
                 break;
@@ -1839,7 +1882,7 @@ void DecodeInstruction(struct i8080Status *CPU)
                 CPU->a = system_memory[CPU->sp + 1];
                 /* Restore PSW from stack */
                 (CPU->flags.C) = (system_memory[CPU->sp] & 0x01);
-                /* */
+
                 (CPU->flags.P) = (system_memory[CPU->sp] & 0x04) >> 2;
                 (CPU->flags.Y) = (system_memory[CPU->sp] & 0x08) >> 3;
                 (CPU->flags.I) = (system_memory[CPU->sp] & 0x10) >> 4;
